@@ -1,4 +1,4 @@
-name: 'AI Code Review Bot'
+name: 'AI Code Review Bot Using LLM'
 description: 'Automated code review using AI/LLM for Pull Requests'
 author: 'AI Code Review Bot'
 
