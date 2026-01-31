@@ -1,0 +1,84 @@
+name: 'AI Code Review'
+description: 'Automated code review using AI/LLM for Pull Requests'
+author: 'AI Code Review Bot'
+
+branding:
+  icon: 'check-circle'
+  color: 'blue'
+
+inputs:
+  github_token:
+    description: 'GitHub token for API access'
+    required: true
+  llm_provider:
+    description: 'LLM provider (openai, anthropic, google, azure, mistral, groq, or custom)'
+    required: false
+    default: 'openai'
+  llm_api_key:
+    description: 'API key for the LLM provider'
+    required: true
+  llm_model:
+    description: 'Model name to use'
+    required: false
+    default: 'gpt-4'
+  llm_api_base:
+    description: 'Custom API base URL (optional)'
+    required: false
+    default: ''
+  languages:
+    description: 'Comma-separated list of file extensions to review (e.g., py,js,go)'
+    required: false
+    default: ''
+  max_comments:
+    description: 'Maximum number of review comments'
+    required: false
+    default: '20'
+  fail_on_severity:
+    description: 'Fail the action if issues of this severity or higher are found (CRITICAL, HIGH, MEDIUM, LOW)'
+    required: false
+    default: ''
+  review_tone:
+    description: 'Tone of the review (professional, strict, mentoring, friendly)'
+    required: false
+    default: 'professional'
+  custom_prompt:
+    description: 'Additional custom instructions for the reviewer'
+    required: false
+    default: ''
+  config_path:
+    description: 'Path to configuration file (.ai-review.yml)'
+    required: false
+    default: '.ai-review.yml'
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+    
+    - name: Install dependencies
+      shell: bash
+      run: |
+        python -m pip install --upgrade pip
+        pip install requests pyyaml
+    
+    - name: Run AI Code Review
+      shell: bash
+      env:
+        GITHUB_TOKEN: ${{ inputs.github_token }}
+        GITHUB_REPOSITORY: ${{ github.repository }}
+        PR_NUMBER: ${{ github.event.pull_request.number }}
+        LLM_PROVIDER: ${{ inputs.llm_provider }}
+        LLM_API_KEY: ${{ inputs.llm_api_key }}
+        LLM_MODEL: ${{ inputs.llm_model }}
+        LLM_API_BASE: ${{ inputs.llm_api_base }}
+        LANGUAGES: ${{ inputs.languages }}
+        MAX_COMMENTS: ${{ inputs.max_comments }}
+        FAIL_ON_SEVERITY: ${{ inputs.fail_on_severity }}
+        REVIEW_TONE: ${{ inputs.review_tone }}
+        CUSTOM_PROMPT: ${{ inputs.custom_prompt }}
+        CONFIG_PATH: ${{ inputs.config_path }}
+      run: |
+        python ${{ github.action_path }}/ai_code_review_bot.py
